@@ -1,0 +1,19 @@
+name: raftstereo
+channels:
+  - pytorch
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.7.6
+  - pytorch=1.7.0
+  - torchvision=0.8.1
+  - cudatoolkit=10.2.89
+  - matplotlib
+  - tensorboard
+  - scipy
+  - opencv
+  - tqdm
+  - opt_einsum
+  - imageio
+  - scikit-image
+  - p7zip
