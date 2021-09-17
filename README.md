@@ -4,6 +4,16 @@ This repository contains the source code for our paper:
 [RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching](https://arxiv.org/pdf/2109.07547.pdf)<br/>
 Lahav Lipson, Zachary Teed and Jia Deng<br/>
 
+```
+@article{lipson2021raft,
+  title={{RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching}},
+  author={Lipson, Lahav and Teed, Zachary and Deng, Jia},
+  journal={arXiv preprint arXiv:2109.07547},
+  year={2021}
+}
+```
+
+
 <img src="RAFTStereo.png">
 
 ## Requirements
@@ -17,7 +27,7 @@ conda activate raftstereo
 
 
 ## Required Data
-To evaluate/train RAFT, you will need to download the required datasets. 
+To evaluate/train RAFT-stereo, you will need to download the required datasets. 
 * [Sceneflow](https://lmb.informatik.uni-freiburg.de/resources/datasets/SceneFlowDatasets.en.html#:~:text=on%20Academic%20Torrents-,FlyingThings3D,-Driving) (Includes FlyingThings3D, Driving & Monkaa
 * [Middlebury](https://vision.middlebury.edu/stereo/data/)
 * [ETH3D](https://www.eth3d.net/datasets#low-res-two-view-test-data)
