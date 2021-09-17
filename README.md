@@ -1,7 +1,7 @@
 # RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching
 This repository contains the source code for our paper:
 
-[RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching](https://www.google.com)<br/>
+[RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching](https://arxiv.org/pdf/2109.07547.pdf)<br/>
 Lahav Lipson, Zachary Teed and Jia Deng<br/>
 
 <img src="RAFTStereo.png">
