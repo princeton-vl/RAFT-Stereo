@@ -71,11 +71,11 @@ Pretrained models can be downloaded by running
 ```Shell
 chmod ug+x download_models.sh && ./download_models.sh
 ```
-or downloaded from [google drive](https://drive.google.com/drive/folders/1booUFYEXmsdombVuglatP0nZXb5qI89J)
+or downloaded from [google drive](https://drive.google.com/drive/folders/1booUFYEXmsdombVuglatP0nZXb5qI89J). We recommend our [Middlebury model](https://drive.google.com/file/d/1m3KoukUmKDoMv-ySOO6vBzYfWLyj9yqd/view?usp=sharing) for in-the-wild images.
 
 You can demo a trained model on pairs of images. To predict stereo for Middlebury, run
 ```Shell
-python demo.py --restore_ckpt models/raftstereo-sceneflow.pth
+python demo.py --restore_ckpt models/raftstereo-middlebury.pth --corr_implementation alt --mixed_precision -l=datasets/Middlebury/MiddEval3/testF/*/im0.png -r=datasets/Middlebury/MiddEval3/testF/*/im1.png
 ```
 Or for ETH3D:
 ```Shell
