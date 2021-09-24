@@ -94,7 +94,7 @@ If the camera focal length and camera baseline are known, disparity predictions 
 
 <img src="depth_eq.png" width="320">
 
-Note that the units of the focal length are _pixels_ not millimeters.
+Note that the units of the focal length are _pixels_ not millimeters. (cx1-cx0) is the x-difference of principal points.
 
 ## Evaluation
 

@@ -142,14 +142,16 @@ class SceneFlowDatasets(StereoDataset):
         right_images = [ im.replace('left', 'right') for im in left_images ]
         disparity_images = [ im.replace(self.dstype, 'disparity').replace('.png', '.pfm') for im in left_images ]
 
-        with open(osp.join('datasets', 'flyingthings_validation.txt')) as f:
-            validation_files = set(f.read().splitlines())
+        # Choose a random subset of 400 images for validation
+        state = np.random.get_state()
+        np.random.seed(1000)
+        val_idxs = set(np.random.permutation(len(left_images))[:400])
+        np.random.set_state(state)
 
-        for img1, img2, disp in zip(left_images, right_images, disparity_images):
-            if split == 'TEST' and disp not in validation_files:
-                continue
-            self.image_list += [ [img1, img2] ]
-            self.disparity_list += [ disp ]
+        for idx, (img1, img2, disp) in enumerate(zip(left_images, right_images, disparity_images)):
+            if (split == 'TEST' and idx in val_idxs) or split == 'TRAIN':
+                self.image_list += [ [img1, img2] ]
+                self.disparity_list += [ disp ]
         logging.info(f"Added {len(self.disparity_list) - original_length} from FlyingThings {self.dstype}")
 
     def _add_monkaa(self):
