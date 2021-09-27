@@ -83,14 +83,14 @@ python demo.py --restore_ckpt models/raftstereo-eth3d.pth -l=datasets/ETH3D/*/im
 ```
 Using our fastest model:
 ```Shell
-python demo.py --restore_ckpt models/raftstereo-realtime.pth  --shared_backbone --n_downsample 3 --n_gru_layers 2 --slow_fast_gru 
+python demo.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 1 --valid_iters 13 --corr_implementation reg_cuda --mixed_precision
 ```
 
 To save the disparity values as `.npy` files, run any of the demos with the `--save_numpy` flag. 
 
 ## Converting Disparity to Depth 
 
-If the camera focal length and camera baseline are known, disparity predictions can be converted to depth values using
+If the camera intrinsics and camera baseline are known, disparity predictions can be converted to depth values using
 
 <img src="depth_eq.png" width="320">
 
