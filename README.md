@@ -61,9 +61,7 @@ By default `stereo_datasets.py` will search for the datasets in these locations.
     ├── Middlebury
         ├── MiddEval3
     ├── ETH3D
-        ├── lakeside_1l
-        ├── ...
-        ├── tunnel_3s
+        ├── two_view_testing
 ```
 
 ## Demos
@@ -79,11 +77,11 @@ python demo.py --restore_ckpt models/raftstereo-middlebury.pth --corr_implementa
 ```
 Or for ETH3D:
 ```Shell
-python demo.py --restore_ckpt models/raftstereo-eth3d.pth -l=datasets/ETH3D/*/im0.png -r=datasets/ETH3D/*/im1.png
+python demo.py --restore_ckpt models/raftstereo-eth3d.pth -l=datasets/ETH3D/two_view_testing/*/im0.png -r=datasets/ETH3D/two_view_testing/*/im1.png
 ```
 Using our fastest model:
 ```Shell
-python demo.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 1 --valid_iters 13 --corr_implementation reg_cuda --mixed_precision
+python demo.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 2 --slow_fast_gru --valid_iters 7 --corr_implementation reg_cuda --mixed_precision
 ```
 
 To save the disparity values as `.npy` files, run any of the demos with the `--save_numpy` flag. 
