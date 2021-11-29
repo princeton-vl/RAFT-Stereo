@@ -79,7 +79,7 @@ Or for ETH3D:
 ```Shell
 python demo.py --restore_ckpt models/raftstereo-eth3d.pth -l=datasets/ETH3D/two_view_testing/*/im0.png -r=datasets/ETH3D/two_view_testing/*/im1.png
 ```
-Using our fastest model:
+Our fastest model (uses the [faster implementation](#optional-faster-implementation)):
 ```Shell
 python demo.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 2 --slow_fast_gru --valid_iters 7 --corr_implementation reg_cuda --mixed_precision
 ```
