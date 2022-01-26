@@ -128,7 +128,7 @@ def readDispKITTI(filename):
 
 # Method taken from /n/fs/raft-depth/RAFT-Stereo/datasets/SintelStereo/sdk/python/sintel_io.py
 def readDispSintelStereo(file_name):
-    a = np.array(Image.open(file_name))
+    a = np.array(Image.open(file_name), dtype=np.float64)
     d_r, d_g, d_b = np.split(a, axis=2, indices_or_sections=3)
     disp = (d_r * 4 + d_g / (2**6) + d_b / (2**14))[..., 0]
     mask = np.array(Image.open(file_name.replace('disparities', 'occlusions')))
