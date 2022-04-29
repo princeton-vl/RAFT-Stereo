@@ -2,13 +2,14 @@
 This repository contains the source code for our paper:
 
 [RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching](https://arxiv.org/pdf/2109.07547.pdf)<br/>
+3DV 2021, Best Student Paper Award<br/>
 Lahav Lipson, Zachary Teed and Jia Deng<br/>
 
 ```
-@article{lipson2021raft,
-  title={{RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching}},
+@inproceedings{lipson2021raft,
+  title={RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching},
   author={Lipson, Lahav and Teed, Zachary and Deng, Jia},
-  journal={arXiv preprint arXiv:2109.07547},
+  booktitle={International Conference on 3D Vision (3DV)},
   year={2021}
 }
 ```
@@ -112,7 +113,7 @@ To train using significantly less memory, change `--n_downsample 2` to `--n_down
 
 ## (Optional) Faster Implementation
 
-We provide a faster CUDA implementation of the correlation volume which works with mixed precision feature maps.
+We provide a faster CUDA implementation of the correlation sampler which works with mixed precision feature maps.
 ```Shell
 cd sampler && python setup.py install && cd ..
 ```
