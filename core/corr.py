@@ -116,8 +116,8 @@ class CorrBlock1D:
         # all pairs correlation
         corr = CorrBlock1D.corr(fmap1, fmap2)
 
-        batch, h1, w1, dim, w2 = corr.shape
-        corr = corr.reshape(batch*h1*w1, dim, 1, w2)
+        batch, h1, w1, _, w2 = corr.shape
+        corr = corr.reshape(batch*h1*w1, 1, 1, w2)
 
         self.corr_pyramid.append(corr)
         for i in range(self.num_levels):
@@ -133,7 +133,7 @@ class CorrBlock1D:
         for i in range(self.num_levels):
             corr = self.corr_pyramid[i]
             dx = torch.linspace(-r, r, 2*r+1)
-            dx = dx.view(1, 1, 2*r+1, 1).to(coords.device)
+            dx = dx.view(2*r+1, 1).to(coords.device)
             x0 = dx + coords.reshape(batch*h1*w1, 1, 1, 1) / 2**i
             y0 = torch.zeros_like(x0)
 

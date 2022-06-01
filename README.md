@@ -111,6 +111,16 @@ python train_stereo.py --batch_size 8 --train_iters 22 --valid_iters 32 --spatia
 ```
 To train using significantly less memory, change `--n_downsample 2` to `--n_downsample 3`. This will slightly reduce accuracy.
 
+To finetune the sceneflow model on the 23 scenes from the [Middlebury 2014 stereo dataset](https://vision.middlebury.edu/stereo/data/scenes2014/), download the data using
+
+```Shell
+chmod ug+x download_middlebury_2014.sh && ./download_middlebury_2014.sh
+```
+and run
+```Shell
+python train_stereo.py --train_datasets middlebury_2014 --num_steps 4000 --image_size 384 1000 --restore_ckpt models/raftstereo-sceneflow.pth --batch_size 2 --train_iters 22 --valid_iters 32 --spatial_scale -0.2 0.4 --saturation_range 0 1.4 --n_downsample 2  --mixed_precision
+```
+
 ## (Optional) Faster Implementation
 
 We provide a faster CUDA implementation of the correlation sampler which works with mixed precision feature maps.

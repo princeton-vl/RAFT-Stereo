@@ -154,14 +154,18 @@ def readDispTartanAir(file_name):
 
 
 def readDispMiddlebury(file_name):
-    assert basename(file_name) == 'disp0GT.pfm'
-    disp = readPFM(file_name).astype(np.float32)
-    assert len(disp.shape) == 2
-    nocc_pix = file_name.replace('disp0GT.pfm', 'mask0nocc.png')
-    assert exists(nocc_pix)
-    nocc_pix = imageio.imread(nocc_pix) == 255
-    assert np.any(nocc_pix)
-    return disp, nocc_pix
+    if basename(file_name) == 'disp0GT.pfm':
+        disp = readPFM(file_name).astype(np.float32)
+        assert len(disp.shape) == 2
+        nocc_pix = file_name.replace('disp0GT.pfm', 'mask0nocc.png')
+        assert exists(nocc_pix)
+        nocc_pix = imageio.imread(nocc_pix) == 255
+        assert np.any(nocc_pix)
+        return disp, nocc_pix
+    elif basename(file_name) == 'disp0.pfm':
+        disp = readPFM(file_name).astype(np.float32)
+        valid = disp < 1e3
+        return disp, valid
 
 def writeFlowKITTI(filename, uv):
     uv = 64.0 * uv + 2**15
