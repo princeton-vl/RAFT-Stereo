@@ -17,6 +17,8 @@ Lahav Lipson, Zachary Teed and Jia Deng<br/>
 
 <img src="RAFTStereo.png">
 
+<img src="https://media.giphy.com/media/nYqxbmAdGDgVJ2lQYK/giphy.gif" alt="drawing" width="450"/> <img src="https://media.giphy.com/media/y8hD5SNh1QHc8yCGBv/giphy.gif" alt="drawing" width="450"/>
+
 ## Requirements
 The code has been tested with PyTorch 1.7 and Cuda 10.2.
 ```Shell
