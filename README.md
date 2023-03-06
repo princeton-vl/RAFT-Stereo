@@ -14,10 +14,11 @@ Lahav Lipson, Zachary Teed and Jia Deng<br/>
 }
 ```
 
-
 <img src="RAFTStereo.png">
 
 <img src="https://media.giphy.com/media/nYqxbmAdGDgVJ2lQYK/giphy.gif" alt="drawing" width="400"/> <img src="https://media.giphy.com/media/y8hD5SNh1QHc8yCGBv/giphy.gif" alt="drawing" width="400"/>
+
+##  [<img src="https://i.imgur.com/QCojoJk.png" width="40"> You can run RAFT-Stereo + Point-Cloud Visualization in Google Colab](https://colab.research.google.com/drive/1G8WJCQt9y55qxQH6QV6PpPvWEbd393g2?usp=sharing)
 
 ## Requirements
 The code has been tested with PyTorch 1.7 and Cuda 10.2.
