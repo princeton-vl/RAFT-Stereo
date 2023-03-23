@@ -138,7 +138,7 @@ chmod ug+x download_middlebury_2014.sh && ./download_middlebury_2014.sh
 ```
 and run
 ```Shell
-python train_stereo.py --train_datasets middlebury_2014 --num_steps 4000 --image_size 384 1000 --restore_ckpt models/raftstereo-sceneflow.pth --batch_size 2 --train_iters 22 --valid_iters 32 --spatial_scale -0.2 0.4 --saturation_range 0 1.4 --n_downsample 2  --mixed_precision
+python train_stereo.py --train_datasets middlebury_2014 --num_steps 4000 --image_size 384 1000 --lr 0.00002 --restore_ckpt models/raftstereo-sceneflow.pth --batch_size 2 --train_iters 22 --valid_iters 32 --spatial_scale -0.2 0.4 --saturation_range 0 1.4 --n_downsample 2  --mixed_precision
 ```
 
 ## (Optional) Faster Implementation
