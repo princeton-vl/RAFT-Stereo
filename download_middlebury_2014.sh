@@ -1,4 +1,4 @@
-mkdir datasets/Middlebury/2014
+mkdir datasets/Middlebury/2014 -p
 cd datasets/Middlebury/2014
 wget https://vision.middlebury.edu/stereo/data/scenes2014/zip/Adirondack-imperfect.zip
 wget https://vision.middlebury.edu/stereo/data/scenes2014/zip/Adirondack-perfect.zip
