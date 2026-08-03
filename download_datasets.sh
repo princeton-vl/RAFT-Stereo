@@ -1,6 +1,6 @@
 mkdir datasets/Middlebury -p
 cd datasets/Middlebury/
-wget https://www.dropbox.com/s/fn8siy5muak3of3/official_train.txt -P MiddEval3/
+mkdir -p MiddEval3 && wget "https://www.dropbox.com/scl/fi/hapqw13bq6izf05kfrgdr/official_train.txt?rlkey=ybmfw7ijmd43fnc0js5zifzzu&dl=1" -O MiddEval3/official_train.txt
 wget https://vision.middlebury.edu/stereo/submit3/zip/MiddEval3-data-Q.zip
 unzip MiddEval3-data-Q.zip
 wget https://vision.middlebury.edu/stereo/submit3/zip/MiddEval3-GT0-Q.zip
