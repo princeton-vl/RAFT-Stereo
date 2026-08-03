@@ -76,7 +76,7 @@ By default `stereo_datasets.py` will search for the datasets in these locations.
 
 iRaftStereo_RVC ranked 2nd on the [stereo leaderboard](http://www.robustvision.net/leaderboard.php) at the Robust Vision Challenge at ECCV 2022.
 
-To use the model, download + unzip [models.zip](https://www.dropbox.com/s/ftveifyqcomiwaq/models.zip) and run
+To use the model, download + unzip [models.zip](https://www.dropbox.com/scl/fi/5khx1bhz84dapi8vtwapg/models.zip?rlkey=ggddrn1du1iiq6mgc2dsdpmwi&dl=1) and run
 ```
 python demo.py --restore_ckpt models/iraftstereo_rvc.pth --context_norm instance -l=datasets/ETH3D/two_view_testing/*/im0.png -r=datasets/ETH3D/two_view_testing/*/im1.png
 ```
