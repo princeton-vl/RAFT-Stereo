@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from core.utils.utils import bilinear_sampler
+from raft_stereo.utils.utils import bilinear_sampler
 
 try:
     import corr_sampler

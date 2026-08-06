@@ -14,8 +14,8 @@ from pathlib import Path
 from glob import glob
 import os.path as osp
 
-from core.utils import frame_utils
-from core.utils.augmentor import FlowAugmentor, SparseFlowAugmentor
+from raft_stereo.utils import frame_utils
+from raft_stereo.utils.augmentor import FlowAugmentor, SparseFlowAugmentor
 
 
 class StereoDataset(data.Dataset):

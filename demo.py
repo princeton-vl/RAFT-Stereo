@@ -1,14 +1,11 @@
-import sys
-sys.path.append('core')
-
 import argparse
 import glob
 import numpy as np
 import torch
 from tqdm import tqdm
 from pathlib import Path
-from raft_stereo import RAFTStereo
-from utils.utils import InputPadder
+from raft_stereo.raft_stereo import RAFTStereo
+from raft_stereo.utils.utils import InputPadder
 from PIL import Image
 from matplotlib import pyplot as plt
 

@@ -1,6 +1,4 @@
 from __future__ import print_function, division
-import sys
-sys.path.append('core')
 
 import argparse
 import time
@@ -8,9 +6,9 @@ import logging
 import numpy as np
 import torch
 from tqdm import tqdm
-from raft_stereo import RAFTStereo, autocast
-import stereo_datasets as datasets
-from utils.utils import InputPadder
+from raft_stereo.raft_stereo import RAFTStereo, autocast
+import raft_stereo.stereo_datasets as datasets
+from raft_stereo.utils.utils import InputPadder
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
