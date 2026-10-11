@@ -198,7 +198,7 @@ if __name__ == '__main__':
 
     # Architecure choices
     parser.add_argument('--hidden_dims', nargs='+', type=int, default=[128]*3, help="hidden state and context dimensions")
-    parser.add_argument('--corr_implementation', choices=["reg", "alt", "reg_cuda", "alt_cuda"], default="reg", help="correlation volume implementation")
+    parser.add_argument('--corr_implementation', choices=["reg", "alt", "reg_cuda", "reg_gather"], default="reg", help="correlation volume implementation")
     parser.add_argument('--shared_backbone', action='store_true', help="use a single backbone for the context and feature encoders")
     parser.add_argument('--corr_levels', type=int, default=4, help="number of levels in the correlation pyramid")
     parser.add_argument('--corr_radius', type=int, default=4, help="width of the correlation pyramid")
@@ -228,7 +228,7 @@ if __name__ == '__main__':
     # The CUDA implementations of the correlation volume prevent half-precision
     # rounding errors in the correlation lookup. This allows us to use mixed precision
     # in the entire forward pass, not just in the GRUs & feature extractors. 
-    use_mixed_precision = args.corr_implementation.endswith("_cuda")
+    use_mixed_precision = args.corr_implementation.endswith("_cuda") or args.corr_implementation == "reg_gather"
 
     if args.dataset == 'eth3d':
         validate_eth3d(model, iters=args.valid_iters, mixed_prec=use_mixed_precision)

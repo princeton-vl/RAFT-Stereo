@@ -82,7 +82,9 @@ class BasicMotionEncoder(nn.Module):
 
         cor_flo = torch.cat([cor, flo], dim=1)
         out = F.relu(self.conv(cor_flo))
-        return torch.cat([out, flow], dim=1)
+        # under autocast `out` is fp16 and flow fp32: cat would promote the whole GRU input to fp32,
+        # only for the next conv to round it back to fp16. Rounding flow here gives the same conv input.
+        return torch.cat([out, flow.to(out.dtype)], dim=1)
 
 def pool2x(x):
     return F.avg_pool2d(x, 3, stride=2, padding=1)
@@ -92,7 +94,9 @@ def pool4x(x):
 
 def interp(x, dest):
     interp_args = {'mode': 'bilinear', 'align_corners': True}
-    return F.interpolate(x, dest.shape[2:], **interp_args)
+    # autocast runs upsampling in fp32; return x's dtype so the GRU input cat stays fp16 (the next conv
+    # would round to fp16 anyway, so the values reaching it are unchanged)
+    return F.interpolate(x, dest.shape[2:], **interp_args).to(x.dtype)
 
 class BasicMultiUpdateBlock(nn.Module):
     def __init__(self, args, hidden_dims=[]):
@@ -112,7 +116,7 @@ class BasicMultiUpdateBlock(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(256, (factor**2)*9, 1, padding=0))
 
-    def forward(self, net, inp, corr=None, flow=None, iter08=True, iter16=True, iter32=True, update=True):
+    def forward(self, net, inp, corr=None, flow=None, iter08=True, iter16=True, iter32=True, update=True, compute_mask=True):
 
         if iter32:
             net[2] = self.gru32(net[2], *(inp[2]), pool2x(net[1]))
@@ -132,6 +136,9 @@ class BasicMultiUpdateBlock(nn.Module):
             return net
 
         delta_flow = self.flow_head(net[0])
+
+        if not compute_mask:
+            return net, None, delta_flow
 
         # scale mask to balence gradients
         mask = .25 * self.mask(net[0])

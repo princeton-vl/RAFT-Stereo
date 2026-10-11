@@ -4,19 +4,17 @@ from core.utils.utils import bilinear_sampler
 
 try:
     import corr_sampler
-except:
-    pass
-
-try:
-    import alt_cuda_corr
-except:
-    # alt_cuda_corr is not compiled
-    pass
-
+except ImportError:
+    corr_sampler = None
 
 class CorrSampler(torch.autograd.Function):
     @staticmethod
     def forward(ctx, volume, coords, radius):
+        if corr_sampler is None:
+            raise RuntimeError(
+                "reg_cuda requires the optional sampler extension; build sampler/ "
+                "or use reg_gather for the build-free PyTorch path"
+            )
         ctx.save_for_backward(volume,coords)
         ctx.radius = radius
         corr, = corr_sampler.forward(volume, coords, radius)
@@ -44,9 +42,9 @@ class CorrBlockFast1D:
     def __call__(self, coords):
         out_pyramid = []
         bz, _, ht, wd = coords.shape
-        coords = coords[:, [0]]
+        coords = coords[:, :1]  # list indexing ([0]) builds a CPU index tensor -> H2D copy + sync
         for i in range(self.num_levels):
-            corr = CorrSampler.apply(self.corr_pyramid[i].squeeze(3), coords/2**i, self.radius)
+            corr = CorrSampler.apply(self.corr_pyramid[i].squeeze(3), (coords/2**i).float(), self.radius)  # sampler reads fp32 coords
             out_pyramid.append(corr.view(bz, -1, ht, wd))
         return torch.cat(out_pyramid, dim=1)
 
@@ -104,7 +102,7 @@ class PytorchAlternateCorrBlock1D:
             fmap2 = F.avg_pool2d(fmap2, [1, 2], stride=[1, 2])
             out_pyramid.append(corr)
         out = torch.cat(out_pyramid, dim=-1)
-        return out.permute(0, 3, 1, 2).contiguous().float()
+        return out.permute(0, 3, 1, 2).float()  # caller picks the memory format
 
 
 class CorrBlock1D:
@@ -118,6 +116,8 @@ class CorrBlock1D:
 
         batch, h1, w1, _, w2 = corr.shape
         corr = corr.reshape(batch*h1*w1, 1, 1, w2)
+        # lookup offsets, created on the device once (a CPU tensor .to(device) per call syncs the stream)
+        self.dx = torch.linspace(-radius, radius, 2*radius+1, device=corr.device).view(2*radius+1, 1)
 
         self.corr_pyramid.append(corr)
         for i in range(self.num_levels):
@@ -132,9 +132,7 @@ class CorrBlock1D:
         out_pyramid = []
         for i in range(self.num_levels):
             corr = self.corr_pyramid[i]
-            dx = torch.linspace(-r, r, 2*r+1)
-            dx = dx.view(2*r+1, 1).to(coords.device)
-            x0 = dx + coords.reshape(batch*h1*w1, 1, 1, 1) / 2**i
+            x0 = self.dx + coords.reshape(batch*h1*w1, 1, 1, 1) / 2**i
             y0 = torch.zeros_like(x0)
 
             coords_lvl = torch.cat([x0,y0], dim=-1)
@@ -143,7 +141,7 @@ class CorrBlock1D:
             out_pyramid.append(corr)
 
         out = torch.cat(out_pyramid, dim=-1)
-        return out.permute(0, 3, 1, 2).contiguous().float()
+        return out.permute(0, 3, 1, 2).float()  # caller picks the memory format
 
     @staticmethod
     def corr(fmap1, fmap2):
@@ -156,33 +154,42 @@ class CorrBlock1D:
         return corr / torch.sqrt(torch.tensor(D).float())
 
 
-class AlternateCorrBlock:
+class CorrBlockGather1D:
+    """Same lookup as reg / reg_cuda, in plain PyTorch ops that export to ONNX / TensorRT (no grid_sample, no extension):
+    all-pairs volume as one batched matmul in the feature dtype (fp16 under AMP, as reg_cuda), pyramid by 1-D average
+    pooling, linear interpolation of the 2r+2 integer taps around each lookup position via torch.gather (ONNX
+    GatherElements). Taps outside the row read 0 (= reg_cuda / grid_sample zero padding). Output channels are
+    level-major (level * (2r+1) + tap), as reg_cuda."""
+
     def __init__(self, fmap1, fmap2, num_levels=4, radius=4):
-        raise NotImplementedError
         self.num_levels = num_levels
         self.radius = radius
-
-        self.pyramid = [(fmap1, fmap2)]
-        for i in range(self.num_levels):
-            fmap1 = F.avg_pool2d(fmap1, 2, stride=2)
-            fmap2 = F.avg_pool2d(fmap2, 2, stride=2)
-            self.pyramid.append((fmap1, fmap2))
+        B, D, H, W1 = fmap1.shape
+        # [B, H, W1, D] @ [B, H, D, W2] -> [B, H, W1, W2]
+        corr = torch.matmul(fmap1.permute(0, 2, 3, 1), fmap2.permute(0, 2, 1, 3)) * (D**-0.5)
+        corr = corr.reshape(B * H * W1, -1)
+        self.shape = (B, H, W1)
+        self.corr_pyramid = [corr]
+        for _ in range(1, num_levels):
+            # == F.avg_pool1d(corr, 2, 2) as the mean of even / odd slices (TensorRT 11's Myelin finds no tactic for
+            # a 1-D average pool over B*H*W rows)
+            n = corr.shape[-1] // 2
+            corr = corr[:, : 2 * n].reshape(corr.shape[0], n, 2).mean(dim=-1)
+            self.corr_pyramid.append(corr)
+        self.taps = torch.arange(-radius, radius + 2, device=fmap1.device)
 
     def __call__(self, coords):
-        coords = coords.permute(0, 2, 3, 1)
-        B, H, W, _ = coords.shape
-        dim = self.pyramid[0][0].shape[1]
-
-        corr_list = []
-        for i in range(self.num_levels):
-            r = self.radius
-            fmap1_i = self.pyramid[0][0].permute(0, 2, 3, 1).contiguous()
-            fmap2_i = self.pyramid[i][1].permute(0, 2, 3, 1).contiguous()
-
-            coords_i = (coords / 2**i).reshape(B, 1, H, W, 2).contiguous()
-            corr, = alt_cuda_corr.forward(fmap1_i, fmap2_i, coords_i, r)
-            corr_list.append(corr.squeeze(1))
-
-        corr = torch.stack(corr_list, dim=1)
-        corr = corr.reshape(B, -1, H, W)
-        return corr / torch.sqrt(torch.tensor(dim).float())
+        B, H, W1 = self.shape
+        x = coords[:, 0].reshape(B * H * W1, 1).float()
+        out = []
+        for i, vol in enumerate(self.corr_pyramid):
+            w2 = vol.shape[-1]
+            xi = x / 2**i
+            x0 = torch.floor(xi)
+            a = (xi - x0).to(vol.dtype)
+            idx = x0.long() + self.taps  # [N, 2r+2]
+            valid = (idx >= 0) & (idx < w2)
+            v = torch.gather(vol, 1, idx.clamp(0, w2 - 1)) * valid.to(vol.dtype)
+            out.append(v[:, :-1] * (1 - a) + v[:, 1:] * a)  # [N, 2r+1]
+        out = torch.cat(out, dim=1).view(B, H, W1, -1)
+        return out.permute(0, 3, 1, 2)  # NHWC storage (channels_last view)

@@ -123,7 +123,7 @@ std::vector<torch::Tensor> sampler_cuda_forward(
   torch::Tensor corr = torch::zeros(
     {batch_size, 2*radius+1, ht, wd}, opts);
 
-  AT_DISPATCH_FLOATING_TYPES_AND_HALF(volume.type(), "sampler_forward_kernel", ([&] {
+  AT_DISPATCH_FLOATING_TYPES_AND_HALF(volume.scalar_type(), "sampler_forward_kernel", ([&] {
     sampler_forward_kernel<scalar_t><<<blocks, threads>>>(
       volume.packed_accessor32<scalar_t,4,torch::RestrictPtrTraits>(),
       coords.packed_accessor32<float,4,torch::RestrictPtrTraits>(),
@@ -154,7 +154,7 @@ std::vector<torch::Tensor> sampler_cuda_backward(
   const dim3 threads(BLOCK, BLOCK);
 
 
-  AT_DISPATCH_FLOATING_TYPES_AND_HALF(volume.type(), "sampler_backward_kernel", ([&] {
+  AT_DISPATCH_FLOATING_TYPES_AND_HALF(volume.scalar_type(), "sampler_backward_kernel", ([&] {
     sampler_backward_kernel<scalar_t><<<blocks, threads>>>(
       coords.packed_accessor32<float,4,torch::RestrictPtrTraits>(),
       corr_grad.packed_accessor32<scalar_t,4,torch::RestrictPtrTraits>(),
