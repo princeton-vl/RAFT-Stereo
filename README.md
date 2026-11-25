@@ -1,3 +1,26 @@
+# RAFT-Stereo: faster inference fork
+
+> **You are on `portable`.** Research fork of [princeton-vl/RAFT-Stereo](https://github.com/princeton-vl/RAFT-Stereo) (base `6e93ed2`; `main` mirrors upstream). Two branches:
+> - [`portable`](https://github.com/fastforks/RAFT-Stereo/tree/portable): plain PyTorch, exports to ONNX / TensorRT, no build step.
+> - [`cuda-kernels`](https://github.com/fastforks/RAFT-Stereo/tree/cuda-kernels): `portable` plus custom CUDA kernels (prebuilt for sm_80 to sm_120; the fp16-accumulate convs need `pip install nvidia-cudnn-frontend`).
+> Licence, as upstream: code MIT · weights not stated by upstream
+
+RAFT-Stereo, Middlebury checkpoint, 32 iterations; upstream = `reg_cuda` with mixed precision (fp16 autocast); speed-ups are quoted against the flags row first, then against upstream. RTX 5060 Ti 16 GB, torch 2.14.1+cu130, TensorRT 11.4, 2026-10-10. Median of 10 runs; memory = torch peak allocated / reserved (TensorRT: process GPU memory).
+
+| version | KITTI ms | Midd-H ms | Midd-F ms | speed-up at H (vs flags / vs upstream) | peak MB at H (alloc / reserved) | peak MB at F (alloc / reserved) | startup / new size | ETH3D EPE | Midd-H EPE |
+|---|---|---|---|---|---|---|---|---|---|
+| upstream (fp16 autocast, `reg_cuda`) | 292 | 1025 | 4292 | 0.99x / 1.00x | 2498 / 3268 | 9515 / 12428 | 1.39 s / 0.00 s | 0.274 | 1.068 |
+| upstream + flags (`cudnn.benchmark`, TF32, `inference_mode`; upstream's autocast kept) | 290 | 1018 | - | 1.00x / 1.01x | 2507 / 4540 | - | 2.8 s / 2.1 s | 0.288* | 1.069 |
+| **portable** | 213 | 744 | 3092 | 1.37x / 1.38x | 1377 / 1490 | 5212 / 5526 | 1.43 s / 0.00 s | 0.289* | 1.069 |
+| portable → TensorRT | 105 | 333 | 1317 | 3.06x / 3.08x | 970 | 4358 | 1.35 s / none | 0.292* | 1.070 |
+| **cuda-kernels** | 88 | 274 | 1086 | 3.72x / 3.74x | 696 / 698 | 2834 / 2858 | 1.09 s / 0.00 s | 0.274 | 1.067 |
+
+\* Evaluated with the Middlebury checkpoint; with the ETH3D checkpoint `portable` gives the upstream 0.274.
+
+Flags row: driver-side only, no source edit; fastest variant that keeps EPE within noise. Tried on top of `inference_mode` + `cudnn.benchmark` + TF32: autocast (the row; upstream already uses it), `model.half()` (287 / 1015 ms, same EPE, not faster than noise), channels_last (slower: 329 / 1123 ms); `torch.compile` excluded. Start-up / new size include the `cudnn.benchmark` autotune (about 1.4 s / 2.1 s more than without); peak reserved includes its workspace; Midd-F not measured (`-`). \* Flags row: Middlebury checkpoint, as `portable`. Raw: `results/2026-10-23_flags_older_forks/` of the publishing workspace.
+
+---
+
 # RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching
 This repository contains the source code for our paper:
 
@@ -102,8 +125,12 @@ python demo.py --restore_ckpt models/raftstereo-eth3d.pth -l=datasets/ETH3D/two_
 ```
 Our fastest model (uses the [faster implementation](#optional-faster-implementation)):
 ```Shell
-python demo.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 2 --slow_fast_gru --valid_iters 7 --corr_implementation reg_cuda --mixed_precision
+
+
+python demo.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 2 --slow_fast_gru --valid_iters 7 --corr_implementation reg_cuda --mixed_precision -l "datasets/test_images/im0.png"  -r "datasets/test_images/im1.png" -t "datasets/test_images/calib.txt"  
 ```
+ python Video_trial.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 2 --slow_fast_gru --valid_iters 7 --corr_implementation reg_cuda --mixed_precision -l "datasets/Middlebury/MiddEval3/testF/*/im0.png"  -r "datasets/Middlebury/MiddEval3/testF/*/im1.png" -t "datasets/Middlebury/MiddEval3/testF/*/calib.txt"  
+
 
 To save the disparity values as `.npy` files, run any of the demos with the `--save_numpy` flag. 
 
