@@ -125,8 +125,12 @@ python demo.py --restore_ckpt models/raftstereo-eth3d.pth -l=datasets/ETH3D/two_
 ```
 Our fastest model (uses the [faster implementation](#optional-faster-implementation)):
 ```Shell
-python demo.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 2 --slow_fast_gru --valid_iters 7 --corr_implementation reg_cuda --mixed_precision
+
+
+python demo.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 2 --slow_fast_gru --valid_iters 7 --corr_implementation reg_cuda --mixed_precision -l "datasets/test_images/im0.png"  -r "datasets/test_images/im1.png" -t "datasets/test_images/calib.txt"  
 ```
+ python Video_trial.py --restore_ckpt models/raftstereo-realtime.pth --shared_backbone --n_downsample 3 --n_gru_layers 2 --slow_fast_gru --valid_iters 7 --corr_implementation reg_cuda --mixed_precision -l "datasets/Middlebury/MiddEval3/testF/*/im0.png"  -r "datasets/Middlebury/MiddEval3/testF/*/im1.png" -t "datasets/Middlebury/MiddEval3/testF/*/calib.txt"  
+
 
 To save the disparity values as `.npy` files, run any of the demos with the `--save_numpy` flag. 
 

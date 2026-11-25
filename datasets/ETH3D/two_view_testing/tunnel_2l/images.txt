@@ -1,0 +1,8 @@
+# Image list with two lines of data per image:
+#   IMAGE_ID, QW, QX, QY, QZ, TX, TY, TZ, CAMERA_ID, NAME
+#   POINTS2D[] as (X, Y, POINT3D_ID)
+# Number of images: 2
+0 0.888798 0.452188 -0.0455172 0.0590976 -2.07569 4.83 -0.0967942 0 im1.png
+
+1 0.888798 0.452188 -0.0455172 0.0590976 -2.01643 4.83 -0.0967942 0 im0.png
+
